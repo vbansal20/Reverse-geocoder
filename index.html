@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <title>Reverse Geocoder</title>
+        <link rel="stylesheet" href="">
+    </head>
+    <body style="padding: 20px;">
+
+        <div class="container">
+            <h2 id="text-center">Enter the latitude and longitude separated by comma without space :</h2>
+            <br>
+            <form id="coordinates">
+                <input type="text" id="latilong" class="form-control form-control-lg"> 
+                <br/><br/>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+            <br> <br>
+
+            <div id="formatted-address"></div>
+            <div id="address-component"></div>
+        </div>
+       
+        
+        <script>
+            
+            var locationform= document.getElementById('coordinates');
+            locationform.addEventListener('submit', revgeocode);
+            
+            //revgeocode();
+            function revgeocode(e){
+
+                e.preventDefault();
+                var latlong= document.getElementById('latilong').value;
+
+                axios.get('https://maps.googleapis.com/maps/api/geocode/json',{
+                    params:{
+                        latlng: latlong,
+                        //result_type: 'political',
+                        key: 'AIzaSyCDiodZOIEbOKnFnfHEQYF7N2L5KEaTszg'
+                    }
+                })
+                .then(function(response){
+                    var formattedAddress = response.data.results[0].formatted_address;
+                    var formattedAddressOutput = ` 
+                        <ul class="list-group">
+                            <li class="list-group-item">${formattedAddress}</li>
+                        </ul>
+                    `;
+
+                    var addressComponents = response.data.results[0].address_components;
+                    var addressComponentOutput = '<ul class="list-group"> ';
+                    for(var i=0; i<addressComponents.length; i++){
+                        addressComponentOutput =`
+                            <li class="list-group-item"><strong>${addressComponents[0].types[0]}</strong>: ${addressComponents[0].long_name}</li>
+                        `;
+                    }
+                    addressComponentOutput += '</ul>'
+
+
+                    // var addressComponents = response.data.results[0].address_components;
+                    // var addressComponentOutput = `
+                    //     <ul class="list-group">
+                    //         <li class="list-group-item"><strong>${addressComponents[0].types[0]}</strong>: ${addressComponents[0].long_name}</li>
+                    //     </ul>
+                    // `;
+                    
+                    document.getElementById('formatted-address').innerHTML= formattedAddressOutput;
+                    document.getElementById('address-component').innerHTML= addressComponentOutput;
+
+
+                })
+                .catch(function(error){
+                    console.log(error);
+                });
+            }
+        </script>
+
+
+    </body>
+</html>
